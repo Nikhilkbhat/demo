@@ -1,0 +1,77 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+/**
+ * cml_parse_ip_address - Parse IP address and subnet mask
+ * @ip_address: IP address string in the format A.B.C.D/M
+ * @network_addr: Array to store the network address
+ * @subnet_mask: Pointer to store the subnet mask
+ *
+ * This function parses the IP address string in the format A.B.C.D/M,
+ * validates the IP address and subnet mask, calculates the network address,
+ * and stores the result in the network_addr array and subnet_mask variable.
+ *
+ * Returns:
+ *   - 0 on success
+ *   - 1 on failure
+ */
+
+int cml_parse_ip_address(const char *ip_address, unsigned int network_addr[4], int *subnet_mask)
+{
+    char ip[4][4];
+
+    if (sscanf(ip_address, "%3[^.].%3[^.].%3[^.].%3[^/]/%d", ip[0], ip[1], ip[2], ip[3], subnet_mask) != 5)
+    {
+        printf("Invalid input format\n");
+        return 1;
+    }
+
+    for (int i = 0; i < 4; i++)
+    {
+        int val = atoi(ip[i]);
+        if (val < 0 || val > 255)
+        {
+            printf("Invalid IP address\n");
+            return 1;
+        }
+    }
+
+    if (*subnet_mask < 0 || *subnet_mask > 32)
+    {
+        printf("Invalid subnet mask\n");
+        return 1;
+    }
+
+    for (int i = 0; i < 4; i++)
+    {
+        network_addr[i] = atoi(ip[i]);
+    }
+
+    int oclear = (32 - *subnet_mask) / 8;
+
+    for (int i = 3; i > 3 - oclear; i--)
+    {
+        network_addr[i] = 0;
+    }
+
+    return 0;
+}
+
+int main()
+{
+    char ip_address[20];
+    printf("Enter the IP address in format A.B.C.D/M: ");
+    scanf("%s", ip_address);
+
+    unsigned int network_addr[4];
+    int subnet_mask;
+    if (cml_parse_ip_address(ip_address, network_addr, &subnet_mask) != 0)
+    {
+        return 1;
+    }
+
+    printf("Network address: %u.%u.%u.%u/%d\n", network_addr[0], network_addr[1], network_addr[2], network_addr[3], subnet_mask);
+
+    return 0;
+}
